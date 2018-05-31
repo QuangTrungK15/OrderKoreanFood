@@ -81,7 +81,7 @@ public class FoodList extends AppCompatActivity {
         adapter = new FirebaseListAdapter<Food>(this,
                 Food.class,
                 R.layout.food_item,
-                food_list.orderByChild("MenuId").equalTo(categoryId)) {
+                food_list.orderByChild("menuId").equalTo(categoryId)) {
             @Override
             protected void populateView(View v, Food model, int position) {
                 TextView textView = v.findViewById(R.id.food_name);
