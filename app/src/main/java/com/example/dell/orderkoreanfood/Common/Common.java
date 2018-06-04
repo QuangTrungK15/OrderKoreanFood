@@ -8,4 +8,7 @@ import com.example.dell.orderkoreanfood.Model.User;
 
 public class Common {
     public static User currentUser;
+
+
+    public final static  String DELETE = "Delete";
 }

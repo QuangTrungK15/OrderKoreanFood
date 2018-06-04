@@ -21,7 +21,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textColorHint="@android:color/white"
-            android:text="01657690869"
+            android:text="0987"
             android:textColor="@android:color/white"
             android:textSize="34dp"
             android:inputType="phone"
