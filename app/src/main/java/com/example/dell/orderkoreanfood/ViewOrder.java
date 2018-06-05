@@ -1,6 +1,12 @@
 package com.example.dell.orderkoreanfood;
 
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.support.v4.app.NotificationCompat;
+import android.support.v4.app.NotificationManagerCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -79,6 +85,63 @@ public class ViewOrder extends AppCompatActivity {
 
         lvOrderView.setAdapter(adapter);
 
+        requests.addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+
+            }
+
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+                Request request = dataSnapshot.getValue(Request.class);
+                if(Common.currentUser.getPhone().equals(request.getPhone().trim())) {
+                    showNotification(dataSnapshot.getKey(), request);
+                }
+            }
+
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) {
+
+            }
+
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+
+
+
+
+    }
+
+    private void showNotification(String key, Request request) {
+        Intent intent = new Intent(getBaseContext(),ViewOrder.class);
+        intent.putExtra("userPhone",request.getPhone());
+        PendingIntent contentIntent = PendingIntent.getActivity(getBaseContext(),0,intent,PendingIntent.FLAG_UPDATE_CURRENT);
+
+
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(getBaseContext());
+
+
+        builder.setAutoCancel(true)
+                .setDefaults(Notification.DEFAULT_ALL)
+                .setContentInfo("Your order was updated")
+                .setContentText("Order #"+key+"was update status to "+convertToStatus(request.getStatus()))
+                .setContentIntent(contentIntent)
+                .setContentInfo("Info")
+                .setSmallIcon(R.mipmap.ic_launcher);
+
+        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
+
+// notificationId is a unique int for each notification that you must define
+        notificationManager.notify(1, builder.build());
+
 
     }
 
@@ -99,9 +162,9 @@ public class ViewOrder extends AppCompatActivity {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
 
-                    deleteMyOrder(adapter.getRef(item.getItemId()).getKey());
+                    deleteMyOrder(adapter.getRef(item.getItemId()).getKey(),adapter.getItem(item.getItemId()));
 
-                    Toast.makeText(ViewOrder.this,"Deleted",Toast.LENGTH_SHORT).show();
+
                 }
             });
             altertDialog.setNegativeButton("NO", new DialogInterface.OnClickListener() {
@@ -117,8 +180,32 @@ public class ViewOrder extends AppCompatActivity {
         return true;
     }
 
-    private void deleteMyOrder(String key) {
-        requests.child(key).removeValue();
+    private void deleteMyOrder(String key, Request request) {
+
+        if(request.getStatus().equals("1")){
+            final AlertDialog.Builder altertDialog = new AlertDialog.Builder(ViewOrder.this);
+            altertDialog.setTitle("Infor");
+            altertDialog.setMessage("You can not remove this order !!!");
+
+
+            altertDialog.setPositiveButton("YES", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    dialog.dismiss();
+                }
+            });
+
+            altertDialog.show();
+
+        }
+        else {
+
+            requests.child(key).removeValue();
+            Toast.makeText(ViewOrder.this, "Deleted", Toast.LENGTH_SHORT).show();
+        }
+
+
+
     }
 
     private String convertToStatus(String status) {
